@@ -1,0 +1,79 @@
+server:
+  port: ${PORT:${SERVER_PORT:0}}
+spring:
+  application:
+    name: catalog-service
+  config:
+    import: optional:configserver:http://localhost:8888
+
+  mongodb:
+    embedded:
+      version: 4.0.2
+  data:
+    mongodb:
+      database: test
+      port: 27018
+
+rabbitmq:
+  username: guest
+  password: guest
+  host: localhost
+  port: 5672
+
+zipkin:
+  base-url: http://localhost:9411/
+  enabled: true
+
+queue:
+  catalog:
+    name: TestQueue
+message: catalog up
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      movies:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 15000
+        permittedNumberOfCallsInHalfOpenState: 3
+        registerHealthIndicator: true
+        allowHealthIndicatorToFail: false
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+      series:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 15000
+        permittedNumberOfCallsInHalfOpenState: 3
+        registerHealthIndicator: true
+        allowHealthIndicatorToFail: false
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  retry:
+    instances:
+      movies:
+        waitDuration: 1000
+        maxAttempts: 3
+        retryExceptions:
+          - feign.FeignException$InternalServerError
+      series:
+        waitDuration: 1000
+        maxAttempts: 3
+        retryExceptions:
+          - feign.FeignException$InternalServerError
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+
+
+
+
